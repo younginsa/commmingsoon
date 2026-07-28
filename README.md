@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next on My Dev-Life
 
-## Getting Started
-
-First, run the development server:
+A Netflix-style board for a 59-app build challenge. Dark, responsive, and driven
+by a single flat array.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # http://localhost:3000
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Adding or moving a project
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Everything lives in [`src/data/projects.ts`](src/data/projects.ts). Change
+`status` and the card moves section — no other file needs editing.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+"confirmed"  →  Backlog rail       (number, placeholder art, concept note)
+"coming-soon" → Coming Soon + hero (teaser banner, D-Day countdown, features)
+"released"   →  Released grid      (thumbnail, tech tags, live link, date)
+```
 
-## Learn More
+Promoting a project is additive: a `confirmed` row becomes `coming-soon` by
+adding `targetDate` / `progress` / `highlights`, then `released` by adding
+`releasedAt` / `liveUrl`. Unused fields are simply ignored by the other cards.
 
-To learn more about Next.js, take a look at the following resources:
+Exactly one `coming-soon` project should carry `featured: true` — that one
+becomes the hero banner. Without it, the nearest `targetDate` is used.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Artwork
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`image` is optional. With no image, the card renders a gradient built from
+`accent: [from, to]` plus a large challenge number — every card looks finished
+before any asset exists. To use real artwork, drop files in `public/` and set
+`image: "/posters/my-app.jpg"`. Remote hosts need an explicit entry in
+`images.remotePatterns` in [`next.config.ts`](next.config.ts).
 
-## Deploy on Vercel
+## Layout rules
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Breakpoint | Sections | Hero |
+| --- | --- | --- |
+| `< md` | horizontal snap rails, one card ≈ 76vw with the next peeking | `86svh`, stacked full-width CTAs |
+| `md` | 2-column grid | `80vh`, left-weighted scrim |
+| `lg` | 3 columns | |
+| `xl` | 4 columns (Coming Soon caps at 3) | |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Both layouts come from one class string in
+[`src/components/Section.tsx`](src/components/Section.tsx) — `flex overflow-x-auto`
+below `md`, `grid` above it. No JS, no resize listeners.
+
+Tap targets are 44px or taller; released cards are a single large link.
+
+## Countdown
+
+[`src/components/Countdown.tsx`](src/components/Countdown.tsx) renders the
+server-computed `D-n` badge on first paint and starts the ticking `HH:MM:SS`
+after mount, so the server and the phone never disagree during hydration. Dates
+are compared at UTC midnight so the day count doesn't drift across timezones.
