@@ -61,9 +61,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export function Countdown({
   targetDate,
   size = "md",
+  light = false,
 }: {
   targetDate: string;
   size?: "sm" | "md";
+  /** Timer text color for light backgrounds; the red badge works on both. */
+  light?: boolean;
 }) {
   const at = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const t = at === 0 ? null : parts(targetDate, at);
@@ -81,7 +84,7 @@ export function Countdown({
 
       {t && (
         <span
-          className={`font-mono tabular-nums text-mist ${
+          className={`font-mono tabular-nums ${light ? "text-ash" : "text-mist"} ${
             big ? "text-sm" : "text-[11px]"
           }`}
         >

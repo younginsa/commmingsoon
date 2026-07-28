@@ -1,29 +1,37 @@
 import { Countdown } from "@/components/Countdown";
 import { Poster } from "@/components/Poster";
-import { formatDate } from "@/lib/format";
+import { accentStyle, formatDate } from "@/lib/format";
 import type { Project } from "@/types/project";
 
 /**
- * Card sizing lives here and nowhere else.
- *
- * Mobile: fixed-width so the parent rail can scroll it horizontally.
- * md+:    width comes from the parent grid track.
+ * Shared sizing: fixed-width snap item on mobile, grid track on md+.
+ * Visual skin differs per zone — dark cinematic for coming-soon, light
+ * catalog (spottedinprod-style hairlines) for released/confirmed.
  */
-const CARD =
+const SIZE =
   "group relative flex w-[76vw] max-w-[300px] shrink-0 snap-start flex-col " +
-  "overflow-hidden rounded-xl border border-hairline bg-surface " +
-  "md:w-auto md:max-w-none " +
-  "transition duration-300 ease-out md:hover:-translate-y-1 " +
-  "md:hover:border-white/25 md:hover:shadow-2xl md:hover:shadow-black/60";
+  "overflow-hidden md:w-auto md:max-w-none transition duration-300 ease-out";
 
-function Tags({ tags }: { tags?: string[] }) {
+const DARK_SKIN =
+  "rounded-xl border border-hairline bg-surface " +
+  "md:hover:-translate-y-1 md:hover:border-white/25 md:hover:shadow-2xl md:hover:shadow-black/60";
+
+const LIGHT_SKIN =
+  "rounded-lg border border-rule bg-paper " +
+  "md:hover:border-carbon/40 md:hover:shadow-lg md:hover:shadow-black/5";
+
+function Tags({ tags, light = false }: { tags?: string[]; light?: boolean }) {
   if (!tags?.length) return null;
   return (
     <ul className="mt-3 flex flex-wrap gap-1.5">
       {tags.map((tag) => (
         <li
           key={tag}
-          className="rounded-full border border-hairline bg-surface-2 px-2 py-0.5 text-[11px] text-mist"
+          className={`rounded-full border px-2 py-0.5 text-[11px] ${
+            light
+              ? "border-rule bg-paper-2 text-ash"
+              : "border-hairline bg-surface-2 text-mist"
+          }`}
         >
           {tag}
         </li>
@@ -32,7 +40,7 @@ function Tags({ tags }: { tags?: string[] }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
+/* ---------------- Released: light catalog card ---------------- */
 
 function ReleasedCard({ project }: { project: Project }) {
   const body = (
@@ -40,23 +48,25 @@ function ReleasedCard({ project }: { project: Project }) {
       <Poster project={project} />
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-baseline justify-between gap-2">
-          <h3 className="text-base font-semibold text-white">{project.title}</h3>
+          <h3 className="text-base font-semibold text-carbon">
+            {project.title}
+          </h3>
           {project.releasedAt && (
             <time
               dateTime={project.releasedAt}
-              className="shrink-0 font-mono text-[11px] text-mist"
+              className="shrink-0 font-mono text-[11px] text-ash"
             >
               {formatDate(project.releasedAt)}
             </time>
           )}
         </div>
-        <p className="mt-1.5 line-clamp-2 text-sm text-mist">
+        <p className="mt-1.5 line-clamp-2 text-sm text-ash">
           {project.tagline}
         </p>
-        <Tags tags={project.tags} />
+        <Tags tags={project.tags} light />
 
-        {/* 44px-tall footer: the thumb target, separate from the card link. */}
-        <div className="mt-auto flex min-h-11 items-center gap-1.5 pt-4 text-sm font-medium text-white">
+        {/* 44px-tall footer: the visible thumb target. */}
+        <div className="mt-auto flex min-h-11 items-center gap-1.5 pt-4 text-sm font-medium text-carbon">
           <span className="text-flame">▶</span>
           {project.liveUrl ? "Open live app" : "Shipped"}
         </div>
@@ -64,44 +74,47 @@ function ReleasedCard({ project }: { project: Project }) {
     </>
   );
 
-  // Whole card is one big tap target when there is somewhere to go.
   return project.liveUrl ? (
     <a
       href={project.liveUrl}
       target="_blank"
       rel="noreferrer"
-      className={`${CARD} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flame`}
+      className={`${SIZE} ${LIGHT_SKIN} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flame`}
     >
       {body}
     </a>
   ) : (
-    <article className={CARD}>{body}</article>
+    <article className={`${SIZE} ${LIGHT_SKIN}`}>{body}</article>
   );
 }
 
+/* ---------------- Coming soon: light card, live countdown ---------------- */
+
 function ComingSoonCard({ project }: { project: Project }) {
   return (
-    <article className={CARD}>
+    <article className={`${SIZE} ${LIGHT_SKIN}`}>
       <Poster project={project} className="aspect-[16/9]" />
       <div className="flex flex-1 flex-col p-4">
         {project.targetDate && (
-          <Countdown targetDate={project.targetDate} size="sm" />
+          <Countdown targetDate={project.targetDate} size="sm" light />
         )}
-        <h3 className="mt-2.5 text-base font-semibold text-white">
+        <h3 className="mt-2.5 text-base font-semibold text-carbon">
           {project.title}
         </h3>
-        <p className="mt-1.5 line-clamp-3 text-sm text-mist">
+        <p className="mt-1.5 line-clamp-3 text-sm text-ash">
           {project.tagline}
         </p>
-        <Tags tags={project.tags} />
+        <Tags tags={project.tags} light />
 
         {typeof project.progress === "number" && (
           <div className="mt-auto pt-4">
-            <div className="flex items-center justify-between text-[11px] text-mist">
+            <div className="flex items-center justify-between text-[11px] text-ash">
               <span>Build progress</span>
-              <span className="font-mono tabular-nums">{project.progress}%</span>
+              <span className="font-mono tabular-nums">
+                {project.progress}%
+              </span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-rule">
               <div
                 className="h-full rounded-full bg-flame"
                 style={{ width: `${project.progress}%` }}
@@ -114,21 +127,39 @@ function ComingSoonCard({ project }: { project: Project }) {
   );
 }
 
+/* ---------------- Confirmed: light card, blurred mystery art ------ */
+
 function ConfirmedCard({ project }: { project: Project }) {
   return (
-    <article className={`${CARD} border-dashed`}>
-      <Poster project={project} className="aspect-[16/10] opacity-55" />
-      <div className="flex flex-1 flex-col p-4">
-        <span className="font-mono text-[11px] tracking-widest text-mist uppercase">
+    <article className={`${SIZE} ${LIGHT_SKIN}`}>
+      {/* Unannounced-app treatment: the accent gradient smeared into a soft
+          blob, like a screenshot you're not allowed to see yet. The blurred
+          layer is oversized so the blur never exposes a hard edge. */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-paper-2">
+        <div
+          className="absolute inset-0 scale-125 blur-2xl saturate-150"
+          style={accentStyle(project.accent)}
+        />
+        <div className="absolute inset-0 bg-white/25" />
+        <span
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center font-mono text-5xl font-bold text-white/85 drop-shadow-sm select-none"
+        >
+          {String(project.no).padStart(2, "0")}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col border-t border-rule p-4">
+        <span className="font-mono text-[11px] tracking-widest text-ash uppercase">
           No. {String(project.no).padStart(2, "0")} · Confirmed
         </span>
-        <h3 className="mt-1.5 text-base font-semibold text-white/85">
+        <h3 className="mt-1.5 text-base font-semibold text-carbon">
           {project.title}
         </h3>
-        <p className="mt-1.5 line-clamp-3 text-sm text-mist">
+        <p className="mt-1.5 line-clamp-3 text-sm text-ash">
           {project.tagline}
         </p>
-        <Tags tags={project.tags} />
+        <Tags tags={project.tags} light />
       </div>
     </article>
   );
