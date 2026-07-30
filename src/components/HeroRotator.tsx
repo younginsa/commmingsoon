@@ -142,28 +142,28 @@ function Slide({
           </ul>
         )}
 
-        {/* 48px-tall CTAs — full width on mobile so they're easy to hit. */}
-        <div className="mt-7 flex flex-col gap-2.5 sm:flex-row">
+        {/* 48px-tall CTAs — one row everywhere; equal halves on mobile. */}
+        <div className="mt-7 flex gap-2.5">
           {released && project.liveUrl ? (
             <a
               href={project.liveUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-ink transition active:scale-[0.98] md:hover:bg-white/85"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-white px-2 text-sm font-semibold text-ink transition active:scale-[0.98] sm:flex-none sm:px-6 md:hover:bg-white/85"
             >
               <span className="text-flame">▶</span> Open live app
             </a>
           ) : (
             <a
               href="#coming-soon"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-semibold text-ink transition active:scale-[0.98] md:hover:bg-white/85"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-white px-2 text-sm font-semibold text-ink transition active:scale-[0.98] sm:flex-none sm:px-6 md:hover:bg-white/85"
             >
               <span className="text-flame">▶</span> See what&apos;s building
             </a>
           )}
           <a
             href="#confirmed"
-            className="inline-flex min-h-12 items-center justify-center rounded-lg bg-white/12 px-6 text-sm font-semibold text-white backdrop-blur transition active:scale-[0.98] md:hover:bg-white/20"
+            className="inline-flex min-h-12 flex-1 items-center justify-center rounded-lg bg-white/12 px-2 text-sm font-semibold text-white backdrop-blur transition active:scale-[0.98] sm:flex-none sm:px-6 md:hover:bg-white/20"
           >
             Browse the archive
           </a>

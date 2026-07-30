@@ -83,7 +83,9 @@ function ReleasedCard({ project }: { project: Project }) {
       />
       <Vis project={project} caption="screenshot soon" />
       <div className="flex flex-1 flex-col border-t border-rule">
-        <p className="line-clamp-2 px-3.5 pt-2.5 pb-2 text-sm leading-relaxed text-ash">
+        {/* mb (not pb): clamped overflow paints into padding, so padding-bottom
+            here would show a sliver of the clipped next line. */}
+        <p className="mb-2 line-clamp-2 px-3.5 pt-2.5 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
         <Chips items={project.tags} />
@@ -128,7 +130,7 @@ function ComingSoonCard({ project }: { project: Project }) {
             <Countdown targetDate={project.targetDate} size="sm" light />
           )}
         </div>
-        <p className="line-clamp-2 px-3.5 pt-2 pb-2 text-sm leading-relaxed text-ash">
+        <p className="px-3.5 pt-2 pb-2 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
         <Chips items={project.tags} />
@@ -163,7 +165,7 @@ function ConfirmedCard({ project }: { project: Project }) {
       />
       <Vis project={project} caption="concept locked" />
       <div className="flex flex-1 flex-col border-t border-rule">
-        <p className="line-clamp-3 px-3.5 pt-2.5 pb-2 text-sm leading-relaxed text-ash">
+        <p className="mb-2 line-clamp-3 px-3.5 pt-2.5 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
         <Chips items={project.tags ?? ["confirmed"]} />
