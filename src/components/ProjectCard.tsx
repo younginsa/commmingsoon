@@ -1,74 +1,96 @@
+import Image from "next/image";
 import { Countdown } from "@/components/Countdown";
-import { Poster } from "@/components/Poster";
-import { accentStyle, formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import type { Project } from "@/types/project";
 
 /**
- * Shared sizing: fixed-width snap item on mobile, grid track on md+.
- * Visual skin differs per zone — dark cinematic for coming-soon, light
- * catalog (spottedinprod-style hairlines) for released/confirmed.
+ * Light-zone cards follow the spottedinprod DS `comp-card` pattern:
+ * square corners, 1px --line borders, a 13px head strip, a 16:10 dot-grid
+ * visual area, and a mono chip row. No shadows, no hue — state and structure
+ * are expressed with borders, fills, and underlines only.
+ *
+ * Sizing: fixed-width snap item on mobile, grid track on md+.
  */
-const SIZE =
+const CARD =
   "group relative flex w-[76vw] max-w-[300px] shrink-0 snap-start flex-col " +
-  "overflow-hidden md:w-auto md:max-w-none transition duration-300 ease-out";
+  "overflow-hidden border border-rule bg-paper transition-colors duration-200 " +
+  "md:w-auto md:max-w-none md:hover:border-chev";
 
-const DARK_SKIN =
-  "rounded-xl border border-hairline bg-surface " +
-  "md:hover:-translate-y-1 md:hover:border-white/25 md:hover:shadow-2xl md:hover:shadow-black/60";
-
-const LIGHT_SKIN =
-  "rounded-lg border border-rule bg-paper " +
-  "md:hover:border-carbon/40 md:hover:shadow-lg md:hover:shadow-black/5";
-
-function Tags({ tags, light = false }: { tags?: string[]; light?: boolean }) {
-  if (!tags?.length) return null;
+/** DS chip: mono 11px, 1px line, square. */
+function Chips({ items }: { items?: string[] }) {
+  if (!items?.length) return null;
   return (
-    <ul className="mt-3 flex flex-wrap gap-1.5">
-      {tags.map((tag) => (
+    <ul className="flex flex-wrap gap-1.5 px-3.5 pt-0 pb-3">
+      {items.map((item) => (
         <li
-          key={tag}
-          className={`rounded-full border px-2 py-0.5 text-[11px] ${
-            light
-              ? "border-rule bg-paper-2 text-ash"
-              : "border-hairline bg-surface-2 text-mist"
-          }`}
+          key={item}
+          className="border border-rule px-2 py-0.5 font-mono text-[11px] text-ash"
         >
-          {tag}
+          {item}
         </li>
       ))}
     </ul>
   );
 }
 
-/* ---------------- Released: light catalog card ---------------- */
+/** DS card head strip: 13px, bottom 1px line, optional mono meta on the right. */
+function Head({ title, meta }: { title: string; meta?: string }) {
+  return (
+    <div className="flex min-h-10 items-center justify-between gap-2 border-b border-rule px-3.5 py-2">
+      <h3 className="truncate text-[13px] text-carbon">{title}</h3>
+      {meta && (
+        <span className="shrink-0 font-mono text-[11px] text-ash">{meta}</span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * DS visual area: 16:10 dot grid with a mono label chip, or the real
+ * screenshot once `project.image` exists.
+ */
+function Vis({ project, caption }: { project: Project; caption: string }) {
+  return (
+    <div className="dotgrid relative flex aspect-[16/10] items-center justify-center">
+      {project.image ? (
+        <Image
+          src={project.image}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 76vw, 25vw"
+          className="object-cover"
+        />
+      ) : (
+        <div className="flex flex-col items-center gap-1.5">
+          <span className="border border-rule bg-paper px-2.5 py-1 font-mono text-[10px] tracking-[0.08em] text-ash">
+            No. {String(project.no).padStart(2, "0")}
+          </span>
+          <span className="text-[11px] text-ash">{caption}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- Released ---------------- */
 
 function ReleasedCard({ project }: { project: Project }) {
   const body = (
     <>
-      <Poster project={project} />
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-baseline justify-between gap-2">
-          <h3 className="text-base font-semibold text-carbon">
-            {project.title}
-          </h3>
-          {project.releasedAt && (
-            <time
-              dateTime={project.releasedAt}
-              className="shrink-0 font-mono text-[11px] text-ash"
-            >
-              {formatDate(project.releasedAt)}
-            </time>
-          )}
-        </div>
-        <p className="mt-1.5 line-clamp-2 text-sm text-ash">
+      <Head
+        title={project.title}
+        meta={project.releasedAt ? formatDate(project.releasedAt) : undefined}
+      />
+      <Vis project={project} caption="screenshot soon" />
+      <div className="flex flex-1 flex-col border-t border-rule">
+        <p className="line-clamp-2 px-3.5 pt-2.5 pb-2 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
-        <Tags tags={project.tags} light />
-
-        {/* 44px-tall footer: the visible thumb target. */}
-        <div className="mt-auto flex min-h-11 items-center gap-1.5 pt-4 text-sm font-medium text-carbon">
-          <span className="text-flame">▶</span>
+        <Chips items={project.tags} />
+        {/* Footer row: plain-text action + pixel chevron, 44px tall. */}
+        <div className="mt-auto flex min-h-11 items-center justify-between border-t border-rule px-3.5 text-sm text-carbon group-hover:underline group-hover:underline-offset-3">
           {project.liveUrl ? "Open live app" : "Shipped"}
+          <span className="hchev text-chev group-hover:text-carbon" />
         </div>
       </div>
     </>
@@ -79,44 +101,47 @@ function ReleasedCard({ project }: { project: Project }) {
       href={project.liveUrl}
       target="_blank"
       rel="noreferrer"
-      className={`${SIZE} ${LIGHT_SKIN} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flame`}
+      className={`${CARD} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-carbon`}
     >
       {body}
     </a>
   ) : (
-    <article className={`${SIZE} ${LIGHT_SKIN}`}>{body}</article>
+    <article className={CARD}>{body}</article>
   );
 }
 
-/* ---------------- Coming soon: light card, live countdown ---------------- */
+/* ---------------- Coming soon ---------------- */
 
 function ComingSoonCard({ project }: { project: Project }) {
   return (
-    <article className={`${SIZE} ${LIGHT_SKIN}`}>
-      <Poster project={project} className="aspect-[16/9]" />
-      <div className="flex flex-1 flex-col p-4">
-        {project.targetDate && (
-          <Countdown targetDate={project.targetDate} size="sm" light />
-        )}
-        <h3 className="mt-2.5 text-base font-semibold text-carbon">
-          {project.title}
-        </h3>
-        <p className="mt-1.5 line-clamp-3 text-sm text-ash">
+    <article className={CARD}>
+      <Head
+        title={project.title}
+        meta={
+          project.targetDate ? formatDate(project.targetDate) : undefined
+        }
+      />
+      <Vis project={project} caption="in production" />
+      <div className="flex flex-1 flex-col border-t border-rule">
+        <div className="px-3.5 pt-2.5">
+          {project.targetDate && (
+            <Countdown targetDate={project.targetDate} size="sm" light />
+          )}
+        </div>
+        <p className="line-clamp-2 px-3.5 pt-2 pb-2 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
-        <Tags tags={project.tags} light />
+        <Chips items={project.tags} />
 
         {typeof project.progress === "number" && (
-          <div className="mt-auto pt-4">
-            <div className="flex items-center justify-between text-[11px] text-ash">
-              <span>Build progress</span>
-              <span className="font-mono tabular-nums">
-                {project.progress}%
-              </span>
+          <div className="mt-auto border-t border-rule px-3.5 py-2.5">
+            <div className="flex items-center justify-between font-mono text-[11px] text-ash">
+              <span>progress</span>
+              <span className="tabular-nums">{project.progress}%</span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-rule">
+            <div className="mt-1.5 h-1 overflow-hidden bg-paper-2">
               <div
-                className="h-full rounded-full bg-flame"
+                className="h-full bg-carbon"
                 style={{ width: `${project.progress}%` }}
               />
             </div>
@@ -127,41 +152,66 @@ function ComingSoonCard({ project }: { project: Project }) {
   );
 }
 
-/* ---------------- Confirmed: light card, blurred mystery art ------ */
+/* ---------------- Confirmed ---------------- */
 
 function ConfirmedCard({ project }: { project: Project }) {
   return (
-    <article className={`${SIZE} ${LIGHT_SKIN}`}>
-      {/* Unannounced-app treatment: the accent gradient smeared into a soft
-          blob, like a screenshot you're not allowed to see yet. The blurred
-          layer is oversized so the blur never exposes a hard edge. */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-paper-2">
-        <div
-          className="absolute inset-0 scale-125 blur-2xl saturate-150"
-          style={accentStyle(project.accent)}
-        />
-        <div className="absolute inset-0 bg-white/25" />
-        <span
-          aria-hidden
-          className="absolute inset-0 flex items-center justify-center font-mono text-5xl font-bold text-white/85 drop-shadow-sm select-none"
-        >
-          {String(project.no).padStart(2, "0")}
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col border-t border-rule p-4">
-        <span className="font-mono text-[11px] tracking-widest text-ash uppercase">
-          No. {String(project.no).padStart(2, "0")} · Confirmed
-        </span>
-        <h3 className="mt-1.5 text-base font-semibold text-carbon">
-          {project.title}
-        </h3>
-        <p className="mt-1.5 line-clamp-3 text-sm text-ash">
+    <article className={CARD}>
+      <Head
+        title={project.title}
+        meta={`No. ${String(project.no).padStart(2, "0")}`}
+      />
+      <Vis project={project} caption="concept locked" />
+      <div className="flex flex-1 flex-col border-t border-rule">
+        <p className="line-clamp-3 px-3.5 pt-2.5 pb-2 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
-        <Tags tags={project.tags} light />
+        <Chips items={project.tags ?? ["confirmed"]} />
       </div>
     </article>
+  );
+}
+
+/* ---------------- Mobile tile: Netflix-style 3-up grid ---------------- */
+
+/**
+ * Compact portrait tile for the mobile 3-column grids (Released/Confirmed) —
+ * the Netflix search-grid pattern, in DS clothes: 2:3 dot-grid poster with
+ * the number chip, title strip below. Real artwork fills the poster when
+ * `image` exists.
+ */
+export function ProjectTile({ project }: { project: Project }) {
+  const inner = (
+    <>
+      <div className="dotgrid relative flex aspect-[2/3] items-center justify-center">
+        {project.image ? (
+          <Image
+            src={project.image}
+            alt=""
+            fill
+            sizes="30vw"
+            className="object-cover"
+          />
+        ) : (
+          <span className="border border-rule bg-paper px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] text-ash">
+            {String(project.no).padStart(2, "0")}
+          </span>
+        )}
+      </div>
+      <div className="border-t border-rule px-1.5 py-1.5">
+        <p className="truncate text-[11px] text-carbon">{project.title}</p>
+      </div>
+    </>
+  );
+
+  const cls = "flex flex-col overflow-hidden border border-rule bg-paper";
+
+  return project.liveUrl ? (
+    <a href={project.liveUrl} target="_blank" rel="noreferrer" className={cls}>
+      {inner}
+    </a>
+  ) : (
+    <article className={cls}>{inner}</article>
   );
 }
 

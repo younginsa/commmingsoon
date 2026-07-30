@@ -1,11 +1,15 @@
-import { ProjectCard } from "@/components/ProjectCard";
+import { ProjectCard, ProjectTile } from "@/components/ProjectCard";
 import { SECTIONS, type Project, type ProjectStatus } from "@/types/project";
 
 /**
- * One responsive container, two layouts — no JS, no media-query hooks.
+ * Responsive layouts, no JS:
  *
- *   < md : flex + overflow-x-auto + snap  → Netflix-style horizontal rail.
- *   ≥ md : grid, 2 → 3 → 4 columns.
+ *   Coming Soon    < md : horizontal snap rail (few items, cards carry the
+ *                         live countdown + progress, worth the width)
+ *   Released/
+ *   Confirmed      < md : Netflix-style 3-column tile grid (these lists grow
+ *                         toward 59 — a rail would take forever to swipe)
+ *   everything     ≥ md : gapped card grid, 2 → 3 → 4 columns.
  */
 const RAIL =
   "no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-2 " +
@@ -18,16 +22,6 @@ const COLUMNS: Record<ProjectStatus, string> = {
   confirmed: "lg:grid-cols-3 xl:grid-cols-4",
 };
 
-/**
- * The page runs dark at the top (hero + progress strip) and light for all
- * card sections — trailer up top, catalog underneath.
- */
-const TONE: Record<ProjectStatus, "dark" | "light"> = {
-  "coming-soon": "light",
-  released: "light",
-  confirmed: "light",
-};
-
 export function Section({
   status,
   projects,
@@ -36,56 +30,59 @@ export function Section({
   projects: Project[];
 }) {
   if (!projects.length) return null;
-  const { label, eyebrow, blurb } = SECTIONS[status];
-  const light = TONE[status] === "light";
+  const { label, blurb } = SECTIONS[status];
+  const rail = status === "coming-soon";
 
   return (
-    <section
-      id={status}
-      className={`scroll-mt-20 px-4 py-8 md:px-8 md:py-12 ${light ? "bg-paper" : ""}`}
-    >
-      <div className="mx-auto max-w-[1600px]">
-        <header className="mb-4 flex items-end justify-between gap-4 md:mb-6">
-          <div>
-            <p className="font-mono text-[11px] tracking-[0.2em] text-flame uppercase">
-              {eyebrow}
-            </p>
-            <h2
-              className={`mt-1 text-xl font-bold tracking-tight md:text-3xl ${
-                light ? "text-carbon" : "text-white"
-              }`}
-            >
-              {label}
-            </h2>
-            <p className={`mt-1 text-sm ${light ? "text-ash" : "text-mist"}`}>
-              {blurb}
-            </p>
+    <section id={status} className="scroll-mt-20 bg-paper">
+      {/* DS strip header: the line runs full-bleed, text stops at max-width. */}
+      <header className="border-b border-rule px-4 md:px-8">
+        <div className="mx-auto flex min-h-14 max-w-[1600px] items-center justify-between gap-4">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-[15px] text-carbon">{label}</h2>
+            <p className="hidden text-[13px] text-ash sm:block">{blurb}</p>
           </div>
-          <span
-            className={`shrink-0 rounded-full border px-3 py-1 font-mono text-xs ${
-              light
-                ? "border-rule bg-paper-2 text-ash"
-                : "border-hairline bg-surface text-mist"
-            }`}
-          >
+          {/* DS `.n` badge — the one round element in the system. */}
+          <span className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-rule font-mono text-[11px] text-ash">
             {projects.length}
           </span>
-        </header>
-
-        <div className={`${RAIL} ${COLUMNS[status]}`}>
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
         </div>
+      </header>
 
-        {/* Swipe affordance, mobile only. */}
-        <p
-          className={`mt-2 text-[11px] md:hidden ${
-            light ? "text-ash/70" : "text-mist/60"
-          }`}
-        >
-          Swipe to see all {projects.length} →
-        </p>
+      <div className="px-4 py-6 md:px-8 md:py-8">
+        <div className="mx-auto max-w-[1600px]">
+          {rail ? (
+            <>
+              <div className={`${RAIL} ${COLUMNS[status]}`}>
+                {projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+              {/* Swipe affordance, mobile only — pixel chevron, not an arrow. */}
+              <p className="mt-2 flex items-center gap-1.5 text-[11px] text-ash md:hidden">
+                Swipe to see all {projects.length}
+                <span className="hchev text-chev" />
+              </p>
+            </>
+          ) : (
+            <>
+              {/* Mobile: Netflix 3-up tile grid. */}
+              <div className="grid grid-cols-3 gap-2 md:hidden">
+                {projects.map((project) => (
+                  <ProjectTile key={project.id} project={project} />
+                ))}
+              </div>
+              {/* Desktop: full cards. */}
+              <div
+                className={`hidden md:grid md:grid-cols-2 md:gap-5 ${COLUMNS[status]}`}
+              >
+                {projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </section>
   );

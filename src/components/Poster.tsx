@@ -2,10 +2,16 @@ import Image from "next/image";
 import { accentStyle } from "@/lib/format";
 import type { Project } from "@/types/project";
 
+/** Hero placeholder: dark gray gradient, no hue. */
+const MONO_STYLE = {
+  backgroundImage:
+    "radial-gradient(120% 120% at 20% 0%, #3f3f46 0%, #1c1c21 55%, #08080b 100%)",
+};
+
 /**
  * The artwork block. Uses `project.image` when there is one and falls back to
- * the `accent` gradient plus a giant challenge number, so every card looks
- * finished even before any real asset exists.
+ * a gradient — the project's `accent` colors, or a neutral dark gray when
+ * `mono` is set (the hero uses this).
  *
  * `className` carries the aspect ratio — cards and the hero want different ones.
  */
@@ -15,6 +21,7 @@ export function Poster({
   sizes = "(max-width: 768px) 76vw, 25vw",
   priority = false,
   showNumber = true,
+  mono = false,
 }: {
   project: Project;
   className?: string;
@@ -22,11 +29,13 @@ export function Poster({
   priority?: boolean;
   /** Off for the hero, which already prints "No. 04 of 59" in the eyebrow. */
   showNumber?: boolean;
+  /** Dark gray placeholder gradient instead of the accent colors. */
+  mono?: boolean;
 }) {
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={accentStyle(project.accent)}
+      style={mono ? MONO_STYLE : accentStyle(project.accent)}
     >
       {project.image && (
         <Image

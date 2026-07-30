@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Dark zone (hero + coming soon) — Netflix-ish. */
+  /* Dark zone (hero + progress strip) — Netflix-ish. */
   --color-ink: #08080b;
   --color-surface: #14141a;
   --color-surface-2: #1e1e26;
@@ -9,12 +9,14 @@
   --color-flame: #e50914;
   --color-mist: #a1a1ad;
 
-  /* Light zone (released + confirmed) — spottedinprod-ish catalog. */
-  --color-paper: #ffffff;
-  --color-paper-2: #fafafa;
-  --color-rule: #e4e4e7;
-  --color-ash: #71717a;
-  --color-carbon: #18181b;
+  /* Light zone — spottedinprod DS tokens (UX-DS/docs/spottedinprod-ds.html).
+     Names kept from before; values now match the DS exactly. */
+  --color-paper: #ffffff; /* --bg */
+  --color-paper-2: #f2f2f2; /* --surface: fills, Esc chips, subtle buttons */
+  --color-rule: #e6e6e6; /* --line: every border, no exceptions */
+  --color-ash: #8e8e8e; /* --muted */
+  --color-carbon: #111111; /* --ink */
+  --color-chev: #dcdcdc; /* --chev-rest */
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
@@ -27,6 +29,32 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* DS dot-grid: the placeholder texture for card visual areas. */
+@utility dotgrid {
+  background-color: var(--color-paper);
+  background-image: radial-gradient(#d9d9d9 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* DS pixel chevron — 5 corner-touching 1×1 px cells, rendered at exactly 2×
+   (10×14) so each cell is 2 CSS px. Colored via currentColor, so `text-*`
+   utilities drive it. The DS's only "more" indicator. */
+@utility hchev {
+  width: 10px;
+  height: 14px;
+  flex: none;
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 7' shape-rendering='crispEdges'><g fill='black'><rect x='1' y='1' width='1' height='1'/><rect x='2' y='2' width='1' height='1'/><rect x='3' y='3' width='1' height='1'/><rect x='2' y='4' width='1' height='1'/><rect x='1' y='5' width='1' height='1'/></g></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 7' shape-rendering='crispEdges'><g fill='black'><rect x='1' y='1' width='1' height='1'/><rect x='2' y='2' width='1' height='1'/><rect x='3' y='3' width='1' height='1'/><rect x='2' y='4' width='1' height='1'/><rect x='1' y='5' width='1' height='1'/></g></svg>");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 html {

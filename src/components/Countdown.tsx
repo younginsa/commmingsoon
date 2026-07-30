@@ -74,10 +74,12 @@ export function Countdown({
 
   return (
     <div className="flex items-center gap-2.5">
+      {/* Filled chip → 4px radius per DS. Black in the light zone (the DS is
+          monochrome); flame red only in the dark hero zone. */}
       <span
-        className={`rounded-md bg-flame font-mono font-bold tracking-tight text-white ${
-          big ? "px-2.5 py-1 text-base" : "px-2 py-0.5 text-xs"
-        }`}
+        className={`rounded-[4px] font-mono font-bold tracking-tight text-white ${
+          light ? "bg-carbon" : "bg-flame"
+        } ${big ? "px-2.5 py-1 text-base" : "px-2 py-0.5 text-xs"}`}
       >
         {dDayLabel(daysUntil(targetDate))}
       </span>

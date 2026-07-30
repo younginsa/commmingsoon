@@ -83,6 +83,7 @@ function Slide({
           sizes="100vw"
           priority={!fade && !hidden}
           showNumber={false}
+          mono
         />
       </div>
 
@@ -95,7 +96,9 @@ function Slide({
           {String(project.no).padStart(2, "0")} of 59
         </p>
 
-        <h1 className="mt-3 text-4xl leading-[1.05] font-black tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+        {/* Heavy display cut, one step smaller than v1 so long titles
+            don't break the mobile hero. */}
+        <h1 className="mt-3 text-3xl leading-[1.05] font-black tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
           {project.title}
         </h1>
 

@@ -58,28 +58,22 @@ export default function Home() {
 
         <ProgressStrip counts={counts} total={CHALLENGE_TOTAL} />
 
-        {/* ---- light zone: the catalog. Hard cut, no gradient. ---- */}
+        {/* ---- light zone: the catalog. Hard cut, no gradient.
+             Sections carry their own DS strip headers, which double as
+             the dividers between them. ---- */}
         <Section status="coming-soon" projects={grouped["coming-soon"]} />
-
-        <div aria-hidden className="bg-paper px-4 md:px-8">
-          <div className="mx-auto max-w-[1600px] border-t border-rule" />
-        </div>
-
         <Section status="released" projects={grouped.released} />
-
-        <div aria-hidden className="bg-paper px-4 md:px-8">
-          <div className="mx-auto max-w-[1600px] border-t border-rule" />
-        </div>
-
         <Section status="confirmed" projects={grouped.confirmed} />
       </main>
 
-      <footer className="border-t border-rule bg-paper px-4 py-10 text-center text-xs text-ash md:px-8">
-        59 apps. One at a time. ·{" "}
-        <span className="font-mono">{counts.released} down</span>,{" "}
-        <span className="font-mono">
-          {CHALLENGE_TOTAL - counts.released} to go
-        </span>
+      {/* DS bottom strip: 58px, top 1px line, mono counts. */}
+      <footer className="border-t border-rule bg-paper px-4 md:px-8">
+        <div className="mx-auto flex min-h-14 max-w-[1600px] items-center justify-between text-[13px] text-ash">
+          <span>59 apps. One at a time.</span>
+          <span className="font-mono text-[11px]">
+            {counts.released} down · {CHALLENGE_TOTAL - counts.released} to go
+          </span>
+        </div>
       </footer>
     </div>
   );
