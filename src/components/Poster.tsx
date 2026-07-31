@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { accentStyle } from "@/lib/format";
-import type { Project } from "@/types/project";
+import { projectThumb, type Project } from "@/types/project";
 
 /** Hero placeholder: dark gray gradient, no hue. */
 const MONO_STYLE = {
@@ -32,14 +32,15 @@ export function Poster({
   /** Dark gray placeholder gradient instead of the accent colors. */
   mono?: boolean;
 }) {
+  const thumb = projectThumb(project);
   return (
     <div
       className={`relative overflow-hidden ${className}`}
       style={mono ? MONO_STYLE : accentStyle(project.accent)}
     >
-      {project.image && (
+      {thumb && (
         <Image
-          src={project.image}
+          src={thumb}
           alt=""
           fill
           sizes={sizes}

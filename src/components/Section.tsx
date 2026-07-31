@@ -32,11 +32,18 @@ export function Section({
   if (!projects.length) return null;
   const { label, blurb } = SECTIONS[status];
   const rail = status === "coming-soon";
+  // Divider sits ABOVE each section title. The first light section skips it —
+  // a rule there would double up against the dark zone's hard edge.
+  const first = status === "coming-soon";
 
   return (
     <section id={status} className="scroll-mt-20 bg-paper">
-      {/* DS strip header: the line runs full-bleed, text stops at max-width. */}
-      <header className="border-b border-rule px-4 md:px-8">
+      {/* DS strip header: the line runs full-bleed, text stops at max-width.
+          Every title gets air above it; non-first sections put the divider
+          above that air. */}
+      <header
+        className={`px-4 pt-8 md:px-8 md:pt-12 ${first ? "" : "border-t border-rule"}`}
+      >
         <div className="mx-auto flex min-h-14 max-w-[1600px] items-center justify-between gap-4">
           <div className="flex items-baseline gap-3">
             <h2 className="text-[15px] text-carbon">{label}</h2>
@@ -49,7 +56,8 @@ export function Section({
         </div>
       </header>
 
-      <div className="px-4 py-6 md:px-8 md:py-8">
+      {/* Tight under the title, generous before the next divider. */}
+      <div className="px-4 pt-3 pb-16 md:px-8 md:pt-3 md:pb-24">
         <div className="mx-auto max-w-[1600px]">
           {rail ? (
             <>

@@ -14,6 +14,21 @@
  */
 export type ProjectStatus = "confirmed" | "coming-soon" | "released";
 
+/** Released projects link out through typed CTAs with preset designs. */
+export type LinkType = "appstore" | "googleplay" | "weblink";
+
+export interface ProjectLink {
+  type: LinkType;
+  url: string;
+}
+
+/** Admin-facing labels for each link type (public CTA text too). */
+export const LINK_LABELS: Record<LinkType, string> = {
+  appstore: "App Store",
+  googleplay: "Google Play",
+  weblink: "Web",
+};
+
 export interface Project {
   // ---- Always required -------------------------------------------------
   /** Stable slug, used as React key and anchor id. */
@@ -29,20 +44,22 @@ export interface Project {
    *  - confirmed   -> the brief concept note
    */
   tagline: string;
-  /** Two hex stops used for the placeholder / poster gradient. */
-  accent: [string, string];
-
   // ---- Optional, filled in as the project matures -----------------------
-  /** Thumbnail (released) or wide teaser banner (coming-soon). Falls back to `accent`. */
+  /** Legacy: two hex stops for the old gradient posters. Unused by new UI. */
+  accent?: [string, string];
+  /** Legacy single image. Prefer `images[0]`. */
   image?: string;
+  /** Screenshots / artwork. First one is the card thumbnail + hero art. */
+  images?: string[];
   /** Tech tags. Empty for most `confirmed` rows — that's fine. */
   tags?: string[];
 
-  /** released: live deployment. Renders the primary "Open app" button. */
-  liveUrl?: string;
-  repoUrl?: string;
+  /** released: up to 3 outbound links, each rendered as a preset CTA. */
+  links?: ProjectLink[];
   /** released: ISO date (YYYY-MM-DD) shown as the completion date. */
   releasedAt?: string;
+  /** Admin: pinned to the hero rotation (max 8 across all projects). */
+  pinned?: boolean;
 
   /** coming-soon: ISO date (YYYY-MM-DD) that drives the D-Day countdown. */
   targetDate?: string;
@@ -50,8 +67,18 @@ export interface Project {
   progress?: number;
   /** coming-soon: up to 3 bullet features listed under the hero. */
   highlights?: string[];
-  /** coming-soon: exactly one project should set this — it becomes the hero. */
+  /** Legacy hero flag; superseded by `pinned`. */
   featured?: boolean;
+}
+
+/** First usable artwork for a project, or null for the dot-grid placeholder. */
+export function projectThumb(project: Project): string | null {
+  return project.images?.[0] ?? project.image ?? null;
+}
+
+/** First outbound link — the card/tile/hero primary destination. */
+export function primaryLink(project: Project): ProjectLink | null {
+  return project.links?.[0] ?? null;
 }
 
 /** Section metadata, keyed by status. Add a status → add a row. Nothing else. */
@@ -70,7 +97,7 @@ export const SECTIONS: Record<
     blurb: "Built, deployed, and in the wild.",
   },
   confirmed: {
-    label: "Confirmed",
+    label: "Backlog",
     eyebrow: "Backlog",
     blurb: "Locked into the roadmap, not started yet.",
   },

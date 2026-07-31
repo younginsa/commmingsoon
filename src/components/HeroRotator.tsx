@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Countdown } from "@/components/Countdown";
 import { Poster } from "@/components/Poster";
 import { formatDate } from "@/lib/format";
-import type { Project } from "@/types/project";
+import { primaryLink, type Project } from "@/types/project";
 
 const ROTATE_MS = 7000;
 
@@ -70,6 +70,7 @@ function Slide({
   hidden?: boolean;
 }) {
   const released = project.status === "released";
+  const link = primaryLink(project);
 
   return (
     <div
@@ -102,10 +103,6 @@ function Slide({
           {project.title}
         </h1>
 
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
-          {project.tagline}
-        </p>
-
         {/* Status line: countdown for coming-soon, ship date for released. */}
         <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
           {released ? (
@@ -128,52 +125,37 @@ function Slide({
           )}
         </div>
 
-        {!released && project.highlights && (
-          <ul className="mt-5 space-y-1.5">
-            {project.highlights.map((line) => (
-              <li
-                key={line}
-                className="flex gap-2.5 text-sm text-white/70 md:text-base"
-              >
-                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-flame" />
-                {line}
-              </li>
-            ))}
-          </ul>
-        )}
-
         {/* 48px-tall CTAs — one row everywhere; equal halves on mobile. */}
         <div className="mt-7 flex gap-2.5">
-          {released && project.liveUrl ? (
+          {/* Netflix pair: solid white primary with black play glyph,
+              25% white ghost secondary. */}
+          {released && link ? (
             <a
-              href={project.liveUrl}
+              href={link.url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-white px-2 text-sm font-semibold text-ink transition active:scale-[0.98] sm:flex-none sm:px-6 md:hover:bg-white/85"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2.5 rounded-[4px] bg-white px-2 text-sm font-semibold text-black transition active:scale-[0.98] sm:flex-none sm:px-7 md:hover:bg-white/80"
             >
-              <span className="text-flame">▶</span> Open live app
+              <span aria-hidden className="text-[17px] leading-none">▶</span>
+              Open live app
             </a>
           ) : (
             <a
               href="#coming-soon"
-              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-white px-2 text-sm font-semibold text-ink transition active:scale-[0.98] sm:flex-none sm:px-6 md:hover:bg-white/85"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2.5 rounded-[4px] bg-white px-2 text-sm font-semibold text-black transition active:scale-[0.98] sm:flex-none sm:px-7 md:hover:bg-white/80"
             >
-              <span className="text-flame">▶</span> See what&apos;s building
+              <span aria-hidden className="text-[17px] leading-none">▶</span>
+              See what&apos;s building
             </a>
           )}
           <a
             href="#confirmed"
-            className="inline-flex min-h-12 flex-1 items-center justify-center rounded-lg bg-white/12 px-2 text-sm font-semibold text-white backdrop-blur transition active:scale-[0.98] sm:flex-none sm:px-6 md:hover:bg-white/20"
+            className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[4px] bg-white/25 px-2 text-sm font-semibold text-white transition active:scale-[0.98] sm:flex-none sm:px-7 md:hover:bg-white/35"
           >
             Browse the archive
           </a>
         </div>
 
-        {project.tags && (
-          <p className="mt-6 font-mono text-[11px] tracking-wider text-mist">
-            {project.tags.join("  ·  ")}
-          </p>
-        )}
       </div>
     </div>
   );

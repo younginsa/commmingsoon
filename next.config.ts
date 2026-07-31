@@ -5,10 +5,14 @@ const nextConfig: NextConfig = {
   // A lockfile higher up the tree makes Next guess the wrong workspace root.
   turbopack: { root: path.resolve(__dirname) },
 
-  // Project artwork lives in /public. If you later point `Project.image` at a
-  // remote host, whitelist that exact hostname here — never a wildcard, or the
+  // Admin uploads land in Vercel Blob (prod) or /public/uploads (dev).
+  // Scoped to blob storage subdomains only — never a bare wildcard, or the
   // image optimizer becomes an open proxy.
-  // images: { remotePatterns: [{ protocol: "https", hostname: "cdn.example.com" }] },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
+  },
 };
 
 export default nextConfig;

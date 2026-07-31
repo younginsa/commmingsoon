@@ -50,8 +50,7 @@ export const projects: Project[] = [
     tagline:
       "A focus timer that gets uglier the more you break it. Shame-driven productivity.",
     releasedAt: "2026-05-11",
-    liveUrl: "https://dopamine-detox.example.com",
-    repoUrl: "https://github.com/example/dopamine-detox",
+    links: [{ type: "weblink", url: "https://dopamine-detox.example.com" }],
     tags: ["React", "Zustand", "PWA"],
     accent: ["#e50914", "#2a0406"],
   },
@@ -63,8 +62,7 @@ export const projects: Project[] = [
     tagline:
       "Snap a receipt, get a categorized expense row. Korean receipts included.",
     releasedAt: "2026-06-08",
-    liveUrl: "https://ledger-lens.example.com",
-    repoUrl: "https://github.com/example/ledger-lens",
+    links: [{ type: "weblink", url: "https://ledger-lens.example.com" }],
     tags: ["Next.js", "Claude Vision", "Supabase", "Tailwind"],
     accent: ["#f59e0b", "#2b1a02"],
   },
@@ -76,8 +74,7 @@ export const projects: Project[] = [
     tagline:
       "This board. A Netflix-style tracker for all 59 apps, driven by one flat JSON file.",
     releasedAt: "2026-07-24",
-    liveUrl: "https://dev-life.example.com",
-    repoUrl: "https://github.com/example/next-on-my-dev-life",
+    links: [{ type: "weblink", url: "https://dev-life.example.com" }],
     tags: ["Next.js 16", "Tailwind v4", "TypeScript"],
     accent: ["#3b82f6", "#050b1c"],
   },

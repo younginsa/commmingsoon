@@ -1,7 +1,12 @@
 import Image from "next/image";
 import { Countdown } from "@/components/Countdown";
 import { formatDate } from "@/lib/format";
-import type { Project } from "@/types/project";
+import {
+  LINK_LABELS,
+  primaryLink,
+  projectThumb,
+  type Project,
+} from "@/types/project";
 
 /**
  * Light-zone cards follow the spottedinprod DS `comp-card` pattern:
@@ -50,11 +55,12 @@ function Head({ title, meta }: { title: string; meta?: string }) {
  * screenshot once `project.image` exists.
  */
 function Vis({ project, caption }: { project: Project; caption: string }) {
+  const thumb = projectThumb(project);
   return (
     <div className="dotgrid relative flex aspect-[16/10] items-center justify-center">
-      {project.image ? (
+      {thumb ? (
         <Image
-          src={project.image}
+          src={thumb}
           alt=""
           fill
           sizes="(max-width: 768px) 76vw, 25vw"
@@ -75,8 +81,10 @@ function Vis({ project, caption }: { project: Project; caption: string }) {
 /* ---------------- Released ---------------- */
 
 function ReleasedCard({ project }: { project: Project }) {
-  const body = (
-    <>
+  const links = (project.links ?? []).filter((l) => l.url);
+
+  return (
+    <article className={CARD}>
       <Head
         title={project.title}
         meta={project.releasedAt ? formatDate(project.releasedAt) : undefined}
@@ -89,26 +97,27 @@ function ReleasedCard({ project }: { project: Project }) {
           {project.tagline}
         </p>
         <Chips items={project.tags} />
-        {/* Footer row: plain-text action + pixel chevron, 44px tall. */}
-        <div className="mt-auto flex min-h-11 items-center justify-between border-t border-rule px-3.5 text-sm text-carbon group-hover:underline group-hover:underline-offset-3">
-          {project.liveUrl ? "Open live app" : "Shipped"}
-          <span className="hchev text-chev group-hover:text-carbon" />
+        {/* Footer row: one preset CTA per link (max 3), 44px tall. */}
+        <div className="mt-auto flex min-h-11 items-center gap-1.5 border-t border-rule px-3.5 py-2">
+          {links.length === 0 ? (
+            <span className="text-sm text-carbon">Shipped</span>
+          ) : (
+            links.map((link) => (
+              <a
+                key={link.type + link.url}
+                href={link.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-8 items-center gap-1.5 rounded-[4px] bg-paper-2 px-2.5 text-[12px] font-medium text-carbon transition hover:bg-rule"
+              >
+                {LINK_LABELS[link.type]}
+                <span className="hchev scale-75 text-chev" />
+              </a>
+            ))
+          )}
         </div>
       </div>
-    </>
-  );
-
-  return project.liveUrl ? (
-    <a
-      href={project.liveUrl}
-      target="_blank"
-      rel="noreferrer"
-      className={`${CARD} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-carbon`}
-    >
-      {body}
-    </a>
-  ) : (
-    <article className={CARD}>{body}</article>
+    </article>
   );
 }
 
@@ -168,7 +177,7 @@ function ConfirmedCard({ project }: { project: Project }) {
         <p className="mb-2 line-clamp-3 px-3.5 pt-2.5 text-sm leading-relaxed text-ash">
           {project.tagline}
         </p>
-        <Chips items={project.tags ?? ["confirmed"]} />
+        <Chips items={project.tags} />
       </div>
     </article>
   );
@@ -183,12 +192,14 @@ function ConfirmedCard({ project }: { project: Project }) {
  * `image` exists.
  */
 export function ProjectTile({ project }: { project: Project }) {
+  const thumb = projectThumb(project);
+  const link = primaryLink(project);
   const inner = (
     <>
       <div className="dotgrid relative flex aspect-[2/3] items-center justify-center">
-        {project.image ? (
+        {thumb ? (
           <Image
-            src={project.image}
+            src={thumb}
             alt=""
             fill
             sizes="30vw"
@@ -208,8 +219,8 @@ export function ProjectTile({ project }: { project: Project }) {
 
   const cls = "flex flex-col overflow-hidden border border-rule bg-paper";
 
-  return project.liveUrl ? (
-    <a href={project.liveUrl} target="_blank" rel="noreferrer" className={cls}>
+  return link ? (
+    <a href={link.url} target="_blank" rel="noreferrer" className={cls}>
       {inner}
     </a>
   ) : (

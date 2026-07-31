@@ -2,16 +2,20 @@ import { HeroRotator } from "@/components/HeroRotator";
 import { ProgressStrip } from "@/components/ProgressStrip";
 import { Section } from "@/components/Section";
 import { TopNav } from "@/components/TopNav";
-import { CHALLENGE_TOTAL, projects } from "@/data/projects";
+import { CHALLENGE_TOTAL } from "@/data/projects";
+import { getProjects } from "@/lib/store";
 import type { Project, ProjectStatus } from "@/types/project";
+
+// Content is admin-editable, so render per-request instead of at build time.
+export const dynamic = "force-dynamic";
 
 /**
  * Everything on this page is derived from `projects[].status`. There is no
  * per-section list to keep in sync — flip a status and the card moves.
  *
  * The page is two tonal zones:
- *   dark  — hero rotator, progress strip, Coming Soon  (the trailer)
- *   light — Released, Confirmed, footer                (the catalog)
+ *   dark  — hero rotator, progress strip  (the trailer)
+ *   light — Coming Soon, Released, Backlog, footer  (the catalog)
  */
 function groupByStatus(all: Project[]): Record<ProjectStatus, Project[]> {
   const grouped: Record<ProjectStatus, Project[]> = {
@@ -23,7 +27,8 @@ function groupByStatus(all: Project[]): Record<ProjectStatus, Project[]> {
   return grouped;
 }
 
-export default function Home() {
+export default async function Home() {
+  const projects = await getProjects();
   const grouped = groupByStatus(projects);
 
   // Newest releases first; everything else follows deadline / challenge order.
@@ -35,12 +40,17 @@ export default function Home() {
   );
   grouped.confirmed.sort((a, b) => a.no - b.no);
 
-  // Hero rotation: featured coming-soon first, then the two newest releases.
+  // Hero rotation: admin-pinned projects (max 8). Fallback while nothing is
+  // pinned: featured coming-soon + the two newest releases.
+  const pinned = projects.filter((p) => p.pinned).sort((a, b) => a.no - b.no);
   const featured =
     grouped["coming-soon"].find((p) => p.featured) ?? grouped["coming-soon"][0];
-  const heroSlides = [featured, ...grouped.released.slice(0, 2)].filter(
-    (p): p is Project => Boolean(p),
-  );
+  const heroSlides =
+    pinned.length > 0
+      ? pinned.slice(0, 8)
+      : [featured, ...grouped.released.slice(0, 2)].filter(
+          (p): p is Project => Boolean(p),
+        );
 
   const counts: Record<ProjectStatus, number> = {
     released: grouped.released.length,

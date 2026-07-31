@@ -38,7 +38,8 @@ export function dDayLabel(days: number): string {
 }
 
 /** Inline style for the poster gradient used when a project has no image. */
-export function accentStyle([from, to]: [string, string]) {
+export function accentStyle(accent?: [string, string]) {
+  const [from, to] = accent ?? ["#3f3f46", "#1c1c21"];
   return {
     backgroundImage: `radial-gradient(120% 120% at 20% 0%, ${from} 0%, ${to} 62%, #08080b 100%)`,
   };
