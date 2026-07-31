@@ -74,11 +74,26 @@ export function EditPanel({
 
       for (const file of Array.from(files)) {
         if (mode === "blob") {
-          const { upload } = await import("@vercel/blob/client");
-          const blob = await upload(file.name, file, {
-            access: "public",
-            handleUploadUrl: "/api/upload",
+          // Ask the server for a presigned URL, then PUT the file straight
+          // to Blob storage — bypasses the 4.5MB function body limit.
+          const presign = await fetch("/api/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contentType: file.type, size: file.size }),
           });
+          if (!presign.ok) {
+            const d = await presign.json().catch(() => ({}));
+            throw new Error(d.error ?? "upload failed");
+          }
+          const { presignedUrl } = await presign.json();
+          const put = await fetch(presignedUrl, {
+            method: "PUT",
+            headers: { "content-type": file.type },
+            body: file,
+          });
+          if (!put.ok) throw new Error(`upload failed (${put.status})`);
+          const blob = await put.json();
+          if (!blob?.url) throw new Error("upload failed (no url)");
           setImages((prev) => [...prev, blob.url]);
         } else {
           const form = new FormData();

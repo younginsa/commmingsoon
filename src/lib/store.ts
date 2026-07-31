@@ -18,7 +18,14 @@ import type { Project } from "@/types/project";
 const BLOB_KEY = "data/projects.json";
 const LOCAL_FILE = path.join(process.cwd(), "data", "projects.json");
 
-const hasBlob = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+/**
+ * Blob is configured either the legacy way (a read-write env secret) or the
+ * current way (BLOB_STORE_ID + the function's OIDC identity — what the
+ * dashboard injects when you connect a store today). The SDK resolves
+ * whichever is present on its own.
+ */
+export const hasBlob = () =>
+  Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
 
 export async function getProjects(): Promise<Project[]> {
   if (hasBlob()) {
