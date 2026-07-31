@@ -67,16 +67,33 @@ export function EditPanel({
     setUploading(true);
     setError(null);
     try {
+      // In production the browser uploads straight to Blob storage —
+      // Vercel functions cap request bodies at 4.5MB, so proxying the
+      // file through /api/upload would fail on any decent screenshot.
+      const { mode } = await fetch("/api/upload").then((r) => r.json());
+
       for (const file of Array.from(files)) {
-        const form = new FormData();
-        form.append("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: form });
-        if (!res.ok) {
-          const d = await res.json().catch(() => ({}));
-          throw new Error(d.error ?? "upload failed");
+        if (mode === "blob") {
+          const { upload } = await import("@vercel/blob/client");
+          const blob = await upload(file.name, file, {
+            access: "public",
+            handleUploadUrl: "/api/upload",
+          });
+          setImages((prev) => [...prev, blob.url]);
+        } else {
+          const form = new FormData();
+          form.append("file", file);
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: form,
+          });
+          if (!res.ok) {
+            const d = await res.json().catch(() => ({}));
+            throw new Error(d.error ?? "upload failed");
+          }
+          const { url } = await res.json();
+          setImages((prev) => [...prev, url]);
         }
-        const { url } = await res.json();
-        setImages((prev) => [...prev, url]);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "upload failed");
