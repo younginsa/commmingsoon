@@ -40,14 +40,14 @@ export function LoginModal({
     else setError(res.status === 401 ? "Wrong password." : "Login failed.");
   }
 
-  // Portal to <body>: the nav bar has its own backdrop-filter, and a nested
-  // backdrop-filter can only sample within its parent's backdrop root — the
-  // frost would render flat gray if this stayed inside the header.
+  // Portal to <body> so the popover escapes the nav bar's stacking context.
+  // Solid paper background — the popover floats over both the dark hero and
+  // the light catalog, so it can't rely on the page behind it for contrast.
   return createPortal(
     <div
       role="dialog"
       aria-label="Admin login"
-      className="fixed top-16 right-4 z-[60] w-[min(320px,calc(100vw-32px))] border border-rule bg-paper/40 backdrop-blur-2xl backdrop-saturate-150 md:top-[72px] md:right-8"
+      className="fixed top-16 right-4 z-[60] w-[min(320px,calc(100vw-32px))] border border-rule bg-paper shadow-[0_8px_32px_rgba(0,0,0,0.25)] md:top-[72px] md:right-8"
     >
       <div className="flex items-center justify-between border-b border-rule px-3.5 py-2">
         <span className="text-[14px] text-[#6b6b6b]">Admin</span>
