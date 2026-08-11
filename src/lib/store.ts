@@ -33,7 +33,15 @@ export async function getProjects(): Promise<Project[]> {
       const { list } = await import("@vercel/blob");
       const { blobs } = await list({ prefix: BLOB_KEY, limit: 1 });
       if (blobs.length > 0) {
-        const res = await fetch(blobs[0].url, { cache: "no-store" });
+        // Public blob URLs sit behind Vercel's CDN, which serves overwritten
+        // blobs stale. list() metadata is always fresh, so keying the URL on
+        // uploadedAt busts the CDN cache exactly when the content changes.
+        const url = new URL(blobs[0].url);
+        url.searchParams.set(
+          "v",
+          String(new Date(blobs[0].uploadedAt).getTime()),
+        );
+        const res = await fetch(url, { cache: "no-store" });
         if (res.ok) return (await res.json()) as Project[];
       }
     } catch {
@@ -57,6 +65,7 @@ export async function saveProjects(projects: Project[]): Promise<void> {
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: "application/json",
+      cacheControlMaxAge: 60, // platform minimum; pairs with the ?v= buster
     });
     return;
   }

@@ -38,11 +38,13 @@ export function EditPanel({
   project,
   onClose,
   onSave,
+  onDelete,
 }: {
   no: number;
   project: Project | null;
   onClose: () => void;
   onSave: (saved: Project) => void;
+  onDelete: (no: number) => void;
 }) {
   const [title, setTitle] = useState(project?.title ?? "");
   const [status, setStatus] = useState<ProjectStatus>(
@@ -379,23 +381,45 @@ export function EditPanel({
         </div>
 
         {/* Footer strip — sticky so Save is always reachable. */}
-        <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-rule bg-paper px-4 py-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-[4px] bg-paper-2 px-4 py-2 text-[13px] text-ash hover:text-carbon"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={uploading}
-            className="rounded-[4px] bg-black px-5 py-2 text-[13px] font-semibold text-white hover:opacity-85 disabled:opacity-40"
-          >
-            Save
-          </button>
+        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-rule bg-paper px-4 py-3">
+          {project ? <DeleteButton onDelete={() => onDelete(no)} /> : <span />}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-[4px] bg-paper-2 px-4 py-2 text-[13px] text-ash hover:text-carbon"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={uploading}
+              className="rounded-[4px] bg-black px-5 py-2 text-[13px] font-semibold text-white hover:opacity-85 disabled:opacity-40"
+            >
+              Save
+            </button>
+          </div>
         </div>
       </form>
     </aside>
+  );
+}
+
+/** Two-step delete: first click arms it, second confirms. Blur disarms. */
+function DeleteButton({ onDelete }: { onDelete: () => void }) {
+  const [armed, setArmed] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => (armed ? onDelete() : setArmed(true))}
+      onBlur={() => setArmed(false)}
+      className={`rounded-[4px] px-3 py-2 text-[13px] transition ${
+        armed
+          ? "bg-flame font-semibold text-white"
+          : "text-flame hover:bg-paper-2"
+      }`}
+    >
+      {armed ? "Really delete?" : "Delete"}
+    </button>
   );
 }

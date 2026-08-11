@@ -83,6 +83,11 @@ export function AdminBoard({
     setEditingNo(null);
   }
 
+  function deleteProject(no: number) {
+    persist(projects.filter((p) => p.no !== no));
+    setEditingNo(null);
+  }
+
   return (
     <div>
       {/* ── Hero list ─────────────────────────────── */}
@@ -194,6 +199,7 @@ export function AdminBoard({
           project={byNo.get(editingNo) ?? null}
           onClose={() => setEditingNo(null)}
           onSave={saveProject}
+          onDelete={deleteProject}
         />
       )}
     </div>
